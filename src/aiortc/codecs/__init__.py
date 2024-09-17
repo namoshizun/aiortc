@@ -12,6 +12,7 @@ from ..rtcrtpparameters import (
 from .base import Decoder, Encoder
 from .g711 import PcmaDecoder, PcmaEncoder, PcmuDecoder, PcmuEncoder
 from .h264 import H264Decoder, H264Encoder, h264_depayload
+from .h265 import H265Decoder, H265Encoder, h265_depayload
 from .opus import OpusDecoder, OpusEncoder
 from .vpx import Vp8Decoder, Vp8Encoder, vp8_depayload
 
@@ -96,12 +97,26 @@ def init_codecs() -> None:
             },
         )
 
+    for profile_id in ("0", "1", "2"):
+        add_video_codec(
+            "video/H265",
+            {
+                "profile-space": "0",
+                "profile-id": profile_id,
+                "tier-flag": "0",
+                "level-id": "93",
+                "interop-constraints": "1",
+            },
+        )
+
 
 def depayload(codec: RTCRtpCodecParameters, payload: bytes) -> bytes:
     if codec.name == "VP8":
         return vp8_depayload(payload)
     elif codec.name == "H264":
         return h264_depayload(payload)
+    elif codec.name == "H265":
+        return h265_depayload(payload)
     else:
         return payload
 
@@ -149,6 +164,8 @@ def get_decoder(codec: RTCRtpCodecParameters) -> Decoder:
         return PcmuDecoder()
     elif mimeType == "video/h264":
         return H264Decoder()
+    elif mimeType == "video/h265":
+        return H265Decoder()
     elif mimeType == "video/vp8":
         return Vp8Decoder()
     else:
@@ -166,6 +183,8 @@ def get_encoder(codec: RTCRtpCodecParameters) -> Encoder:
         return PcmuEncoder()
     elif mimeType == "video/h264":
         return H264Encoder()
+    elif mimeType == "video/h265":
+        return H265Encoder()
     elif mimeType == "video/vp8":
         return Vp8Encoder()
     else:
